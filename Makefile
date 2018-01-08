@@ -13,7 +13,7 @@ makebin:	$(TARGETS)
 	
 $(TARGETS):	
 	echo $@.o
-	gcc  -g -I/usr/include -I.  $@.c  -o bin/$@.bin $(LLDLIBS)
+	gcc  -g -Wfatal-errors -I/usr/include -I.   $@.c  -o bin/$@.bin $(LLDLIBS)
 	
 	
 

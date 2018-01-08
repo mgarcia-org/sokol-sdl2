@@ -1,4 +1,8 @@
 
+ #define SOKOL_GLCORE33
+// #define SOKOL_GLES3
+ // #define SOKOL_GLES2
+
 #define SOKOL_IMPL
 #include "main.h"
 
@@ -62,20 +66,25 @@ int	main(int argc, char **argv)
 	}
 
 
+
+
+#ifdef SOKOL_GLES2
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-
-#ifdef OGLES3    // Some #define of yours that says it's a mobile build. //
-
-
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#endif
 
-#else
-	//turn ES 3 on in main.h
+#ifdef SOKOL_GLES3
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 #endif // MOBILE //
 
+#ifdef SOKOL_GLCORE33
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+#endif
 
 
 	SDL_GL_LoadLibrary( NULL );
@@ -119,7 +128,7 @@ int	main(int argc, char **argv)
 	sg_desc desc = {0};
 	sg_setup(&desc);
 	assert(sg_isvalid());
-	assert(sg_query_feature(SG_FEATURE_INSTANCING)); //GL version: OpenGL ES 3.0 Mesa 11.2.0 fails for me
+	assert(sg_query_feature(SG_FEATURE_INSTANCING));
 
 	/* vertex buffer for static geometry (goes into vertex buffer bind slot 0) */
 	const float r = 0.05f;
@@ -154,7 +163,9 @@ int	main(int argc, char **argv)
 				.usage = SG_USAGE_STREAM
 	});
 
-	/* create a shader
+	/* create a shader*/
+#ifdef SOKOL_GLCORE33
+
 	    sg_shader shd = sg_make_shader(&(sg_shader_desc){
 	        .vs.uniform_blocks[0] = {
 	            .size = sizeof(vs_params_t),
@@ -182,7 +193,41 @@ int	main(int argc, char **argv)
 	            "  frag_color = color;\n"
 	            "}\n",
 	    });
-	 */
+#endif
+
+
+#ifdef SOKOL_GLES3
+
+	    sg_shader shd = sg_make_shader(&(sg_shader_desc){
+	        .vs.uniform_blocks[0] = {
+	            .size = sizeof(vs_params_t),
+	            .uniforms = {
+	                [0] = { .name="mvp", .type=SG_UNIFORMTYPE_MAT4 }
+	            }
+	        },
+	        .vs.source =
+	            "#version 300 es\n"
+	            "uniform mat4 mvp;\n"
+	            "in vec3 position;\n"
+	            "in vec4 color0;\n"
+	            "in vec3 instance_pos;\n"
+	            "out vec4 color;\n"
+	            "void main() {\n"
+	            "  vec4 pos = vec4(position + instance_pos, 1.0);"
+	            "  gl_Position = mvp * pos;\n"
+	            "  color = color0;\n"
+	            "}\n",
+	        .fs.source =
+	            "#version 300 es\n"
+	            "in vec4 color;\n"
+	            "out vec4 frag_color;\n"
+	            "void main() {\n"
+	            "  frag_color = color;\n"
+	            "}\n",
+	    });
+#endif
+
+#ifdef SOKOL_GLES2
 
 
 	sg_shader shd = sg_make_shader(&(sg_shader_desc){
@@ -210,6 +255,7 @@ int	main(int argc, char **argv)
 						"  gl_FragColor = color;\n"
 						"}\n"
 	});
+#endif
 
 
 	/* pipeline state object, note the vertex layout definition */

@@ -1,4 +1,8 @@
 
+// #define SOKOL_GLCORE33
+// #define SOKOL_GLES3
+ #define SOKOL_GLES2
+
 #define SOKOL_IMPL
 #include "main.h"
 
@@ -61,12 +65,23 @@ int	main(int argc, char **argv)
 
 
 
-#if 1    // Some #define of yours that says it's a mobile build. //
+#ifdef SOKOL_GLES2
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#endif
+
+#ifdef SOKOL_GLES3
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 #endif // MOBILE //
+
+#ifdef SOKOL_GLCORE33
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+#endif
 
 
 	SDL_GL_LoadLibrary( NULL );
