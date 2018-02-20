@@ -1,4 +1,4 @@
-TARGETS = 	instancing mrt mipmap blend arraytex \
+TARGETS = 	deforming_offscreen instancing mrt mipmap blend arraytex \
 			inject dyntex offscreen \
 		  	texcube triangle cube
 
